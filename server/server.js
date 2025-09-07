@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const { GoogleGenerativeAI, GoogleGenerativeAIFetchError } = require('@google/generative-ai');
 const multer = require('multer');
 const fs = require('fs');
+const { SYSTEM_PROMPT, NSFW_KEYWORDS, NSFW_MESSAGE } = require('./config');
 
 dotenv.config();
 
@@ -14,6 +15,25 @@ app.use(cors());
 app.use(express.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// Simple NSFW checker
+function isNSFWText(text) {
+  if (!text) return false;
+  const t = String(text).toLowerCase();
+  return NSFW_KEYWORDS.some(k => t.includes(k));
+}
+
+// Middleware: rejects requests with NSFW prompt/question
+function nsfwGuard(fieldName) {
+  return (req, res, next) => {
+    // For JSON and multipart, attempt to read the field
+    const value = (req.body && req.body[fieldName]) || '';
+    if (isNSFWText(value)) {
+      return res.status(400).json({ message: NSFW_MESSAGE });
+    }
+    next();
+  };
+}
 
 // Configure multer for file storage
 const storage = multer.diskStorage({
@@ -35,7 +55,7 @@ app.get('/', (req, res) => {
   res.send('AI Photo Editor Server is running!');
 });
 
-app.post('/api/generate-image', async (req, res) => {
+app.post('/api/generate-image', nsfwGuard('prompt'), async (req, res) => {
   try {
     const { prompt } = req.body;
     if (!prompt) {
@@ -43,8 +63,8 @@ app.post('/api/generate-image', async (req, res) => {
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
-    
-    const result = await model.generateContent(prompt);
+    // Prepend system prompt to guide safety behavior
+    const result = await model.generateContent(`${SYSTEM_PROMPT}\nUser prompt: ${prompt}`);
     const response = await result.response;
 
     console.log("Full AI Response:", JSON.stringify(response, null, 2));
@@ -92,7 +112,7 @@ app.post('/api/generate-image', async (req, res) => {
   }
 });
 
-app.post('/api/edit-image', upload.fields([{ name: 'image' }, { name: 'mask' }]), async (req, res) => {
+app.post('/api/edit-image', upload.fields([{ name: 'image' }, { name: 'mask' }]), nsfwGuard('prompt'), async (req, res) => {
   const imagePath = req.files.image[0].path;
   const maskPath = req.files.mask[0].path;
 
@@ -114,6 +134,7 @@ app.post('/api/edit-image', upload.fields([{ name: 'image' }, { name: 'mask' }])
       contents: [
         {
           parts: [
+            { text: SYSTEM_PROMPT },
             { text: prompt },
             {
               inlineData: {
@@ -159,7 +180,7 @@ app.post('/api/edit-image', upload.fields([{ name: 'image' }, { name: 'mask' }])
   }
 });
 
-app.post('/api/understand-image', upload.single('image'), async (req, res) => {
+app.post('/api/understand-image', upload.single('image'), nsfwGuard('question'), async (req, res) => {
   const imagePath = req.file.path;
 
   try {
@@ -177,6 +198,7 @@ app.post('/api/understand-image', upload.single('image'), async (req, res) => {
       contents: [
         {
           parts: [
+            { text: SYSTEM_PROMPT },
             { text: question },
             {
               inlineData: {

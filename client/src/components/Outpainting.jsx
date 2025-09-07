@@ -106,14 +106,14 @@ const Outpainting = () => {
               </div>
             </div>
 
-            <div style={{width:350,display:'flex',flexDirection:'column',gap:12}}>
+            <div style={{width:260,display:'flex',flexDirection:'column',gap:12}}>
               <textarea
                 className="input textarea"
+                rows="3"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe what to add to the expanded areas"
-                rows="3"
-              />
+              ></textarea>
               <button className="btn primary" onClick={handleExpand} disabled={loading}>
                 {loading ? 'Expanding...' : 'Expand Image'}
               </button>
