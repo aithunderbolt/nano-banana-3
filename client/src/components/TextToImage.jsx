@@ -43,7 +43,8 @@ const TextToImage = () => {
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="A scenic forest at sunrise, cinematic lighting"
             rows="3"
-          />
+            style={{width: '400px'}}
+          ></textarea>
           <button className={`btn primary`} onClick={generateImage} disabled={loading}>
             {loading ? 'Generating...' : 'Generate'}
           </button>
