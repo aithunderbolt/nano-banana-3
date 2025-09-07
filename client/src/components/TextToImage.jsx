@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { downloadImage } from '../utils/download';
 
 const TextToImage = () => {
   const [prompt, setPrompt] = useState('');
@@ -54,6 +55,7 @@ const TextToImage = () => {
           <div className="media-box">
             <img src={imageUrl} alt="Generated" />
           </div>
+          <button className="btn primary" style={{marginTop: '10px'}} onClick={() => downloadImage(imageUrl)}>Download</button>
         </div>
       )}
     </div>

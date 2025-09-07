@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { downloadImage } from '../utils/download';
 
 const Inpainting = () => {
   const [image, setImage] = useState(null);
@@ -233,6 +234,7 @@ const Inpainting = () => {
           <div className="media-box">
             <img src={editedImage} alt="Edited" />
           </div>
+          <button className="btn primary" style={{marginTop: '10px'}} onClick={() => downloadImage(editedImage)}>Download</button>
         </div>
       )}
     </div>
