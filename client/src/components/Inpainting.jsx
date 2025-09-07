@@ -213,12 +213,12 @@ const Inpainting = () => {
             </div>
 
             <div style={{width:260,display:'flex',flexDirection:'column',gap:12}}>
-              <input
-                className="input"
-                type="text"
+              <textarea
+                className="input textarea"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe the edit (e.g., 'remove the person')"
+                rows="3"
               />
               <button className="btn primary" onClick={handleEdit} disabled={loading}>
                 {loading ? 'Editing...' : 'Edit Image'}

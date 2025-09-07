@@ -24,6 +24,13 @@ const Sidebar = ({ onSelectFeature, activeFeature }) => {
       >
         <span>Out-painting</span>
       </button>
+
+      <button
+        className={`sidebar-button ${activeFeature === 'image-understanding' ? 'active' : ''}`}
+        onClick={() => onSelectFeature('image-understanding')}
+      >
+        <span>Image Understanding</span>
+      </button>
     </div>
   );
 };

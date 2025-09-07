@@ -159,6 +159,52 @@ app.post('/api/edit-image', upload.fields([{ name: 'image' }, { name: 'mask' }])
   }
 });
 
+app.post('/api/understand-image', upload.single('image'), async (req, res) => {
+  const imagePath = req.file.path;
+
+  try {
+    const { question } = req.body;
+    if (!question || !imagePath) {
+      return res.status(400).json({ message: 'Question and image are required.' });
+    }
+
+    const imageBuffer = fs.readFileSync(imagePath);
+    const imageBase64 = imageBuffer.toString('base64');
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
+
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: question },
+            {
+              inlineData: {
+                mimeType: 'image/png',
+                data: imageBase64
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    const result = await model.generateContent(requestBody);
+    const response = await result.response;
+    const answer = response.text();
+
+    console.log("Image Understanding Response:", answer);
+    res.json({ answer: answer });
+
+  } catch (error) {
+    console.error('Error analyzing image:', error);
+    res.status(500).json({ message: 'Error analyzing image', error: error.message });
+  } finally {
+    // Clean up uploaded file
+    fs.unlinkSync(imagePath);
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });

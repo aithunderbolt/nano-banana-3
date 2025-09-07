@@ -37,12 +37,12 @@ const TextToImage = () => {
       <h2>Text-to-Image Generation</h2>
       <div className="prompt-container">
         <div className="control-group">
-          <input
-            className="input"
-            type="text"
+          <textarea
+            className="input textarea"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="A scenic forest at sunrise, cinematic lighting"
+            rows="3"
           />
           <button className={`btn primary`} onClick={generateImage} disabled={loading}>
             {loading ? 'Generating...' : 'Generate'}
