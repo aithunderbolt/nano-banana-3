@@ -1,0 +1,21 @@
+# Dependencies
+/node_modules
+/client/node_modules
+/server/node_modules
+
+# Build artifacts
+/client/dist
+
+# Environment variables
+/server/.env
+
+# Uploads
+/server/uploads
+
+# Logs
+npm-debug.log*
+*.log
+
+# IDE and OS files
+.vscode/
+.DS_Store
