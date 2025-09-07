@@ -49,24 +49,25 @@ app.post('/api/generate-image', async (req, res) => {
 
     console.log("Full AI Response:", JSON.stringify(response, null, 2));
 
-    if (response && response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts && response.candidates[0].content.parts[0]) {
+    if (response && response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts) {
         
-        const imagePart = response.candidates[0].content.parts[0];
-        let imageUrl = '';
+        const imagePart = response.candidates[0].content.parts.find(part => part.fileData || part.inlineData);
 
-        if (imagePart.fileData && imagePart.fileData.fileUri) {
-            imageUrl = imagePart.fileData.fileUri;
-        } else if (imagePart.inlineData && imagePart.inlineData.data) {
-            const mimeType = imagePart.inlineData.mimeType;
-            const base64Data = imagePart.inlineData.data;
-            imageUrl = `data:${mimeType};base64,${base64Data}`;
+        if (imagePart) {
+            let imageUrl = '';
+            if (imagePart.fileData && imagePart.fileData.fileUri) {
+                imageUrl = imagePart.fileData.fileUri;
+            } else if (imagePart.inlineData && imagePart.inlineData.data) {
+                const mimeType = imagePart.inlineData.mimeType;
+                const base64Data = imagePart.inlineData.data;
+                imageUrl = `data:${mimeType};base64,${base64Data}`;
+            }
+            console.log("Extracted Image URL:", imageUrl);
+            return res.json({ imageUrl: imageUrl });
         } else {
-            console.error("Could not find image URI or data in the response part:", imagePart);
+            console.error("Could not find a part with image data in the response.");
             return res.status(500).json({ message: 'Could not parse image from AI response.' });
         }
-
-        console.log("Extracted Image URL:", imageUrl);
-        res.json({ imageUrl: imageUrl });
 
     } else {
         console.error("Unexpected AI response structure:", JSON.stringify(response, null, 2));
