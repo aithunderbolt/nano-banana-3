@@ -93,28 +93,69 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 app.post('/api/edit-image', upload.fields([{ name: 'image' }, { name: 'mask' }]), async (req, res) => {
+  const imagePath = req.files.image[0].path;
+  const maskPath = req.files.mask[0].path;
+
   try {
     const { prompt } = req.body;
-    const imagePath = req.files.image[0].path;
-    const maskPath = req.files.mask[0].path;
+    if (!prompt || !imagePath || !maskPath) {
+      return res.status(400).json({ message: 'Prompt, image, and mask are required.' });
+    }
 
-    // This is a simplified representation. The actual API call will be more complex
-    // and will require sending the image and mask data as base64 strings or via a file URI.
-    // The gemini-2.5-flash-image-preview model's in-painting capabilities would be used here.
-    
-    // For now, we'll just return a placeholder response.
-    console.log(`Received in-painting request with prompt: ${prompt}`);
-    console.log(`Image saved at: ${imagePath}`);
-    console.log(`Mask saved at: ${maskPath}`);
+    const imageBuffer = fs.readFileSync(imagePath);
+    const maskBuffer = fs.readFileSync(maskPath);
 
-    // Placeholder for actual image editing logic
-    const editedImageUrl = "https://via.placeholder.com/512x512.png?text=Edited+Image";
+    const imageBase64 = imageBuffer.toString('base64');
+    const maskBase64 = maskBuffer.toString('base64');
 
-    res.json({ imageUrl: editedImageUrl });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
+
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                mimeType: 'image/png',
+                data: imageBase64
+              }
+            },
+            {
+              inlineData: {
+                mimeType: 'image/png',
+                data: maskBase64
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    const result = await model.generateContent(requestBody);
+    const response = await result.response;
+
+    console.log("Full AI In-painting Response:", JSON.stringify(response, null, 2));
+
+    if (response && response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts) {
+        const imagePart = response.candidates[0].content.parts.find(part => part.inlineData);
+        if (imagePart) {
+            const imageUrl = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+            res.json({ imageUrl: imageUrl });
+        } else {
+            res.status(500).json({ message: 'Could not parse edited image from AI response.' });
+        }
+    } else {
+        res.status(500).json({ message: 'Unexpected AI response structure for in-painting.' });
+    }
 
   } catch (error) {
     console.error('Error editing image:', error);
     res.status(500).json({ message: 'Error editing image', error: error.message });
+  } finally {
+    // Clean up uploaded files
+    fs.unlinkSync(imagePath);
+    fs.unlinkSync(maskPath);
   }
 });
 
