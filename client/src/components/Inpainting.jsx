@@ -140,17 +140,18 @@ const Inpainting = () => {
             onMouseDown={startDrawing}
             onMouseUp={finishDrawing}
             onMouseMove={draw}
-            style={{ cursor: 'crosshair', maxWidth: '100%' }}
           />
-          <input
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe the edit (e.g., 'remove the person')"
-          />
-          <button onClick={handleEdit} disabled={loading}>
-            {loading ? 'Editing...' : 'Edit Image'}
-          </button>
+          <div className="inpainting-controls">
+            <input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe the edit (e.g., 'remove the person')"
+            />
+            <button onClick={handleEdit} disabled={loading}>
+              {loading ? 'Editing...' : 'Edit Image'}
+            </button>
+          </div>
         </div>
       )}
       {error && <p className="error">{error}</p>}
