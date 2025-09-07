@@ -17,6 +17,13 @@ const Sidebar = ({ onSelectFeature, activeFeature }) => {
       >
         <span>In-painting</span>
       </button>
+
+      <button
+        className={`sidebar-button ${activeFeature === 'outpainting' ? 'active' : ''}`}
+        onClick={() => onSelectFeature('outpainting')}
+      >
+        <span>Out-painting</span>
+      </button>
     </div>
   );
 };

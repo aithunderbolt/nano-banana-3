@@ -3,6 +3,7 @@ import './App.css';
 import Sidebar from './components/Sidebar';
 import TextToImage from './components/TextToImage';
 import Inpainting from './components/Inpainting';
+import Outpainting from './components/Outpainting';
 
 function App() {
   const [activeFeature, setActiveFeature] = useState('text-to-image');
@@ -13,6 +14,8 @@ function App() {
         return <TextToImage />;
       case 'inpainting':
         return <Inpainting />;
+      case 'outpainting':
+        return <Outpainting />;
       default:
         return <TextToImage />;
     }
