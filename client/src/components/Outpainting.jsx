@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { downloadImage } from '../utils/download';
 
 const Outpainting = () => {
   const [image, setImage] = useState(null);
@@ -127,7 +128,7 @@ const Outpainting = () => {
           <div className="media-box">
             <img src={expandedImage} alt="Expanded" />
           </div>
-          <button className="btn primary" style={{marginTop: '10px'}} onClick={() => window.open(expandedImage, '_blank')}>Download</button>
+          <button className="btn primary" style={{marginTop: '10px'}} onClick={() => downloadImage(expandedImage)}>Download</button>
         </div>
       )}
     </div>
