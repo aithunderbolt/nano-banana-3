@@ -80,6 +80,22 @@ body{
 .image-container{margin-top:18px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#f8fdff,#ffffff);display:flex;justify-content:center;align-items:center;border:1px solid rgba(16,24,40,0.04);max-width:none;width:100%}
 .image-container img{max-width:100%;height:auto;object-fit:contain;display:block}
 
+/* Unified media box: used for input canvas and edited/generated images so both display at the same rendered size */
+.media-box{
+  width:100%;
+  max-width:1100px; /* allow large layouts but cap to a pleasant width */
+  height:600px; /* fixed display height so images and canvas render the same visual size */
+  border-radius:10px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#f8fdff,#ffffff);
+  border:1px solid rgba(16,24,40,0.04);
+}
+.media-box img{width:100%;height:100%;object-fit:contain;display:block}
+.media-box canvas{width:100%;height:100%;display:block}
+
 .error{color:#b00020;margin-top:8px}
 
 /* Responsive breakpoints */
@@ -121,6 +137,9 @@ body{
   .inpainting-container{flex-direction:column}
   .inpainting-container canvas{max-height:60vh;width:100%;height:auto}
 
+  /* reduce media-box height on smaller screens */
+  .media-box{height:50vh;max-width:100%}
+
   /* Limit image height on small devices to avoid overly tall images */
   .image-container{max-height:70vh}
 }
@@ -130,43 +149,4 @@ body{
   .feature h2{font-size:1rem}
   .sidebar-button{font-size:0.95rem;padding:8px 10px}
   .content{padding:12px}
-}
-
-.inpainting-container canvas {
-  border: 2px solid #578FCA;
-  border-radius: 8px;
-  cursor: crosshair;
-  width: 100%; /* scale to container width */
-  height: auto; /* preserve aspect ratio */
-  display: block;
-  max-width: 100%;
-}
-
-.error {
-  color: #D8000C;
-  background-color: #FFD2D2;
-  border: 1px solid #D8000C;
-  padding: 10px;
-  border-radius: 4px;
-  margin-top: 15px;
-}
-
-
-.prompt-container {
-  margin: 20px 0;
-}
-
-.prompt-container input {
-  padding: 10px;
-  width: 300px;
-  margin-right: 10px;
-}
-
-.image-container img {
-  max-width: 100%;
-  margin-top: 20px;
-}
-
-.error {
-  color: red;
 }

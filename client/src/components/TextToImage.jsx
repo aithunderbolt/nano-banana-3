@@ -50,8 +50,10 @@ const TextToImage = () => {
       </div>
       {error && <p className="error">{error}</p>}
       {imageUrl && (
-        <div className="image-container">
-          <img src={imageUrl} alt="Generated" />
+        <div style={{marginTop:18}}>
+          <div className="media-box">
+            <img src={imageUrl} alt="Generated" />
+          </div>
         </div>
       )}
     </div>
