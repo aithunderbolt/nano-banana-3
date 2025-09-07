@@ -35,15 +35,18 @@ const TextToImage = () => {
     <div className="feature">
       <h2>Text-to-Image Generation</h2>
       <div className="prompt-container">
-        <input
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Enter a prompt to generate an image"
-        />
-        <button onClick={generateImage} disabled={loading}>
-          {loading ? 'Generating...' : 'Generate'}
-        </button>
+        <div className="control-group">
+          <input
+            className="input"
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="A scenic forest at sunrise, cinematic lighting"
+          />
+          <button className={`btn primary`} onClick={generateImage} disabled={loading}>
+            {loading ? 'Generating...' : 'Generate'}
+          </button>
+        </div>
       </div>
       {error && <p className="error">{error}</p>}
       {imageUrl && (

@@ -1,13 +1,21 @@
 import React from 'react';
 
-const Sidebar = ({ onSelectFeature }) => {
+const Sidebar = ({ onSelectFeature, activeFeature }) => {
   return (
     <div className="sidebar">
-      <button onClick={() => onSelectFeature('text-to-image')}>
-        Text-to-Image
+      <div className="brand">AI Photo Editor</div>
+      <button
+        className={`sidebar-button ${activeFeature === 'text-to-image' ? 'active' : ''}`}
+        onClick={() => onSelectFeature('text-to-image')}
+      >
+        <span>Text-to-Image</span>
       </button>
-      <button onClick={() => onSelectFeature('inpainting')}>
-        In-painting
+
+      <button
+        className={`sidebar-button ${activeFeature === 'inpainting' ? 'active' : ''}`}
+        onClick={() => onSelectFeature('inpainting')}
+      >
+        <span>In-painting</span>
       </button>
     </div>
   );

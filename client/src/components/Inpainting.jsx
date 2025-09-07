@@ -132,32 +132,42 @@ const Inpainting = () => {
   return (
     <div className="feature">
       <h2>Image In-painting</h2>
-      <input type="file" onChange={handleImageUpload} accept="image/*" />
+      <div className="control-group">
+        <input className="file-input" type="file" onChange={handleImageUpload} accept="image/*" />
+      </div>
+
       {image && (
         <div className="inpainting-container">
-          <canvas
-            ref={canvasRef}
-            onMouseDown={startDrawing}
-            onMouseUp={finishDrawing}
-            onMouseMove={draw}
-          />
-          <div className="inpainting-controls">
-            <input
-              type="text"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the edit (e.g., 'remove the person')"
-            />
-            <button onClick={handleEdit} disabled={loading}>
-              {loading ? 'Editing...' : 'Edit Image'}
-            </button>
+          <div style={{display:'flex',gap:16,alignItems:'flex-start',width:'100%'}}>
+            <div style={{flex:'1 1 600px',minWidth:0}}>
+              <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseUp={finishDrawing}
+                onMouseMove={draw}
+                style={{width:'100%',borderRadius:10,boxShadow:'inset 0 1px 0 rgba(0,0,0,0.03)'}}
+              />
+            </div>
+
+            <div style={{width:260,display:'flex',flexDirection:'column',gap:12}}>
+              <input
+                className="input"
+                type="text"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe the edit (e.g., 'remove the person')"
+              />
+              <button className="btn primary" onClick={handleEdit} disabled={loading}>
+                {loading ? 'Editing...' : 'Edit Image'}
+              </button>
+            </div>
           </div>
         </div>
       )}
       {error && <p className="error">{error}</p>}
       {editedImage && (
         <div className="image-container">
-          <h3>Edited Image:</h3>
+          <h3 style={{marginTop:0}}>Edited Image:</h3>
           <img src={editedImage} alt="Edited" />
         </div>
       )}

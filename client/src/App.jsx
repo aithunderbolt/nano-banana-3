@@ -24,9 +24,11 @@ function App() {
         <h1>AI Photo Editor</h1>
       </header>
       <div className="main-content">
-        <Sidebar onSelectFeature={setActiveFeature} />
+        <Sidebar onSelectFeature={setActiveFeature} activeFeature={activeFeature} />
         <main className="content">
-          {renderFeature()}
+          <div className="container">
+            {renderFeature()}
+          </div>
         </main>
       </div>
     </div>
