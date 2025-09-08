@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { downloadImage } from '../utils/download';
+import { ENDPOINTS } from '../config';
 
 const ImageUnderstanding = () => {
   const [image, setImage] = useState(null);
@@ -42,7 +43,7 @@ const ImageUnderstanding = () => {
       formData.append('image', blob, 'image.png');
       formData.append('question', question);
 
-      const apiResponse = await fetch('http://localhost:5000/api/understand-image', {
+      const apiResponse = await fetch(ENDPOINTS.UNDERSTAND_IMAGE, {
         method: 'POST',
         body: formData,
       });

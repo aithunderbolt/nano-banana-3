@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { downloadImage } from '../utils/download';
+import { ENDPOINTS } from '../config';
 
 const Inpainting = () => {
   const [image, setImage] = useState(null);
@@ -173,7 +174,7 @@ const Inpainting = () => {
   formData.append('mask', maskBlob, 'mask.png');
 
     try {
-      const response = await fetch('http://localhost:5000/api/edit-image', {
+      const response = await fetch(ENDPOINTS.EDIT_IMAGE, {
         method: 'POST',
         body: formData,
       });

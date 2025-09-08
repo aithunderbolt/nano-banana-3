@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { downloadImage } from '../utils/download';
+import { ENDPOINTS } from '../config';
 
 const TextToImage = () => {
   const [prompt, setPrompt] = useState('');
@@ -11,7 +12,7 @@ const TextToImage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:5000/api/generate-image', {
+      const response = await fetch(ENDPOINTS.GENERATE_IMAGE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
