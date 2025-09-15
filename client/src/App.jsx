@@ -6,6 +6,7 @@ import TextToImageN8N from './components/TextToImageN8N';
 import Inpainting from './components/Inpainting';
 import Outpainting from './components/Outpainting';
 import ImageUnderstanding from './components/ImageUnderstanding';
+import Combine from './components/Combine';
 import { ENDPOINTS } from './config';
 
 function App() {
@@ -57,6 +58,8 @@ function App() {
         return <Outpainting />;
       case 'image-understanding':
         return <ImageUnderstanding />;
+      case 'combine':
+        return <Combine />;
       default:
         return <TextToImage />;
     }

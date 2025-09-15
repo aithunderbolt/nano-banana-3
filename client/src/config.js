@@ -17,6 +17,7 @@ export const ENDPOINTS = {
   EDIT_IMAGE: `${API_BASE_URL}/api/edit-image`,
   UNDERSTAND_IMAGE: `${API_BASE_URL}/api/understand-image`,
   ME: `${API_BASE_URL}/api/me`,
+  COMBINE_IMAGES: `${API_BASE_URL}/api/combine-images`,
   // n8n webhook endpoint for text-to-image via n8n
   N8N_GENERATE_IMAGE: N8N_IMAGE_WEBHOOK,
 };

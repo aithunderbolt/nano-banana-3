@@ -38,6 +38,13 @@ const Sidebar = ({ onSelectFeature, activeFeature }) => {
       >
         <span>Image Understanding</span>
       </button>
+
+      <button
+        className={`sidebar-button ${activeFeature === 'combine' ? 'active' : ''}`}
+        onClick={() => onSelectFeature('combine')}
+      >
+        <span>Combine Images</span>
+      </button>
     </div>
   );
 };

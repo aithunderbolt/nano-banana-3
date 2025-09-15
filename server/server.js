@@ -337,6 +337,64 @@ app.post('/api/understand-image', upload.single('image'), nsfwGuard('question'),
   }
 });
 
+// Combine two images using the same Gemini model
+app.post('/api/combine-images', upload.fields([{ name: 'image1' }, { name: 'image2' }]), nsfwGuard('prompt'), async (req, res) => {
+  const img1 = req.files?.image1?.[0]?.path;
+  const img2 = req.files?.image2?.[0]?.path;
+
+  try {
+    const { prompt } = req.body;
+    if (!prompt || !img1 || !img2) {
+      return res.status(400).json({ message: 'Prompt, image1, and image2 are required.' });
+    }
+
+    // Log user and prompt
+    await logPrompt(req, '/api/combine-images', prompt);
+
+    const b1 = fs.readFileSync(img1);
+    const b2 = fs.readFileSync(img2);
+    const i1 = b1.toString('base64');
+    const i2 = b2.toString('base64');
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
+
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: SYSTEM_PROMPT },
+            { text: prompt },
+            { inlineData: { mimeType: 'image/png', data: i1 } },
+            { inlineData: { mimeType: 'image/png', data: i2 } },
+          ],
+        },
+      ],
+    };
+
+    const result = await model.generateContent(requestBody);
+    const response = await result.response;
+
+    console.log('Full AI Combine Response:', JSON.stringify(response, null, 2));
+
+    if (response && response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts) {
+      const imagePart = response.candidates[0].content.parts.find(part => part.inlineData);
+      if (imagePart) {
+        const imageUrl = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+        return res.json({ imageUrl });
+      }
+      return res.status(500).json({ message: 'Could not parse combined image from AI response.' });
+    }
+
+    return res.status(500).json({ message: 'Unexpected AI response structure for combining images.' });
+  } catch (error) {
+    console.error('Error combining images:', error);
+    return res.status(500).json({ message: 'Error combining images', error: error.message });
+  } finally {
+    try { if (img1) fs.unlinkSync(img1); } catch (_) {}
+    try { if (img2) fs.unlinkSync(img2); } catch (_) {}
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
