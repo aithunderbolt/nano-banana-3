@@ -20,10 +20,35 @@ const TextToImage = () => {
         body: JSON.stringify({ prompt }),
       });
 
-      const data = await response.json();
+      // Try to parse JSON only if response advertises JSON
+      const contentType = response.headers.get('content-type') || '';
+      let data = null;
+      if (contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (e) {
+          // fall through to text handling below
+        }
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to generate image');
+        // If not OK, try to extract error details
+        if (!data) {
+          const text = await response.text().catch(() => '');
+          throw new Error(text || `Request failed (${response.status})`);
+        }
+        throw new Error(data.message || `Request failed (${response.status})`);
+      }
+
+      if (!data) {
+        // Successful but no JSON? Try reading as text or flag a generic error
+        const text = await response.text().catch(() => '');
+        if (!text) throw new Error('Empty response from server');
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error('Unexpected non-JSON response from server');
+        }
       }
 
       setImageUrl(data.imageUrl);

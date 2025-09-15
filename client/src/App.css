@@ -38,6 +38,23 @@ body{
 .App-header h1{margin:0;font-size:1.25rem;letter-spacing:0.2px}
 .App-header p{margin:0;color:rgba(255,255,255,0.9);font-size:0.9rem}
 
+/* Spacer to push user badge to the right */
+.header-spacer{flex:1}
+
+/* User badge on the top-right */
+.user-badge{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  color:#fff;
+  min-width:120px;
+}
+.user-name{font-weight:700; font-size:0.95rem}
+.user-sub{opacity:0.9; font-size:0.8rem}
+.user-muted{opacity:0.8}
+.user-error{color:#ffd1d1}
+
 .main-content{display:flex;flex:1;min-width:0}
 
 .sidebar{

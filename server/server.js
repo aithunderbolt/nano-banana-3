@@ -5,14 +5,19 @@ const { GoogleGenerativeAI, GoogleGenerativeAIFetchError } = require('@google/ge
 const multer = require('multer');
 const fs = require('fs');
 const { SYSTEM_PROMPT, NSFW_KEYWORDS, NSFW_MESSAGE } = require('./config');
+const { sso } = require('node-expose-sspi');
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+// Enable CORS with credentials for cross-origin requests (required for IWA in some setups)
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+
+// Note: Do NOT apply SSO globally, otherwise all API endpoints will require negotiation and return 401.
+// We'll apply SSO only to the /api/me route to retrieve the current Windows user.
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -53,6 +58,32 @@ if (!fs.existsSync('uploads')) {
 
 app.get('/', (req, res) => {
   res.send('AI Photo Editor Server is running!');
+});
+
+// Return authenticated Windows user info
+app.get('/api/me', sso.auth(), (req, res) => {
+  try {
+    // node-expose-sspi populates req.sso with user information
+    const user = (req.sso && req.sso.user) || null;
+
+    if (!user) {
+      return res.status(401).json({ authenticated: false, user: null });
+    }
+
+    // Normalize a minimal, stable shape for the client
+    const normalized = {
+      authenticated: true,
+      domain: user.domain || null,
+      name: user.name || null,
+      displayName: user.displayName || null,
+      sid: user.sid || null,
+    };
+
+    return res.json(normalized);
+  } catch (e) {
+    console.error('Error reading Windows user info:', e);
+    return res.status(500).json({ authenticated: false, error: 'Failed to read user info' });
+  }
 });
 
 app.post('/api/generate-image', nsfwGuard('prompt'), async (req, res) => {
