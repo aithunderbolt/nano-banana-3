@@ -79,11 +79,14 @@ async function logPrompt(req, route, promptText) {
   }
 }
 
-// Simple NSFW checker
+// Simple NSFW checker - returns the matched keyword or null
 function isNSFWText(text) {
-  if (!text) return false;
+  if (!text) return null;
   const t = String(text).toLowerCase();
-  return NSFW_KEYWORDS.some(k => t.includes(k));
+  for (const k of NSFW_KEYWORDS) {
+    if (t.includes(k)) return k; // naive match; debug visibility only
+  }
+  return null;
 }
 
 // Middleware: rejects requests with NSFW prompt/question
@@ -91,8 +94,14 @@ function nsfwGuard(fieldName) {
   return (req, res, next) => {
     // For JSON and multipart, attempt to read the field
     const value = (req.body && req.body[fieldName]) || '';
-    if (isNSFWText(value)) {
-      return res.status(400).json({ message: NSFW_MESSAGE });
+    const matched = isNSFWText(value);
+    if (matched) {
+      console.warn('NSFW precheck blocked request. Matched keyword:', matched);
+      const payload = { message: NSFW_MESSAGE };
+      if (process.env.NODE_ENV !== 'production') {
+        payload.matched = matched;
+      }
+      return res.status(400).json(payload);
     }
     next();
   };

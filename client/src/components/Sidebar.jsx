@@ -11,12 +11,12 @@ const Sidebar = ({ onSelectFeature, activeFeature }) => {
         <span>Text-to-Image</span>
       </button>
 
-      <button
+      {/* <button
         className={`sidebar-button ${activeFeature === 'text-to-image-n8n' ? 'active' : ''}`}
         onClick={() => onSelectFeature('text-to-image-n8n')}
       >
         <span>Text-to-Image (n8n)</span>
-      </button>
+      </button> */}
 
       <button
         className={`sidebar-button ${activeFeature === 'inpainting' ? 'active' : ''}`}
