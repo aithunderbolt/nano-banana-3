@@ -171,8 +171,9 @@ app.post('/api/generate-image', nsfwGuard('prompt'), async (req, res) => {
     console.log("Full AI Response:", JSON.stringify(response, null, 2));
 
     if (response && response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts) {
-        
-        const imagePart = response.candidates[0].content.parts.find(part => part.fileData || part.inlineData);
+        const parts = response.candidates[0].content.parts;
+        const imagePart = parts.find(part => part.fileData || part.inlineData);
+        const aiText = typeof response.text === 'function' ? response.text() : '';
 
         if (imagePart) {
             let imageUrl = '';
@@ -186,15 +187,17 @@ app.post('/api/generate-image', nsfwGuard('prompt'), async (req, res) => {
             console.log("Extracted Image URL:", imageUrl);
             return res.json({ imageUrl: imageUrl });
         } else {
-            console.error("Could not find a part with image data in the response.");
-            return res.status(500).json({ message: 'Could not parse image from AI response.' });
+            // Model did not provide image data. Bubble up any textual reason for better UX.
+            const message = aiText || 'Model returned no image content for this prompt.';
+            console.warn('No image in AI response. Textual response:', message);
+            return res.status(400).json({ message });
         }
 
     } else {
         console.error("Unexpected AI response structure:", JSON.stringify(response, null, 2));
-        const text = response.text();
+        const text = typeof response?.text === 'function' ? response.text() : '';
         console.log("AI Response as text:", text);
-        return res.status(500).json({ message: 'AI response did not contain an image.', aiResponse: text });
+        return res.status(400).json({ message: text || 'AI response did not contain an image.' });
     }
 
   } catch (error) {
