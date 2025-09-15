@@ -95,7 +95,10 @@ const Outpainting = () => {
     <div className="feature">
       <h2>Expand Image</h2>
       <div className="control-group">
-        <input className="file-input" type="file" onChange={handleImageUpload} accept="image/*" />
+        <label className="file-input-label">
+          <span>Choose an image to expand</span>
+          <input type="file" onChange={handleImageUpload} accept="image/*" className="file-input" />
+        </label>
       </div>
 
       {image && (

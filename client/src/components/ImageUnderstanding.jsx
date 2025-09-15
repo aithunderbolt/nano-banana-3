@@ -66,7 +66,10 @@ const ImageUnderstanding = () => {
     <div className="feature">
       <h2>Image Understanding</h2>
       <div className="control-group">
-        <input className="file-input" type="file" onChange={handleImageUpload} accept="image/*" />
+        <label className="file-input-label">
+          <span>Choose an image to analyze</span>
+          <input type="file" onChange={handleImageUpload} accept="image/*" className="file-input" />
+        </label>
       </div>
 
       {image && (
