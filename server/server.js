@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const { GoogleGenerativeAI, GoogleGenerativeAIFetchError } = require('@google/generative-ai');
 const multer = require('multer');
 const fs = require('fs');
+const { Pool } = require('pg');
 const { SYSTEM_PROMPT, NSFW_KEYWORDS, NSFW_MESSAGE } = require('./config');
 const { sso } = require('node-expose-sspi');
 
@@ -20,6 +21,63 @@ app.use(express.json());
 app.use('/api', sso.auth());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// PostgreSQL connection pool (configure via env: PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD)
+let pgPool = null;
+const enablePg = !!process.env.PGHOST; // enable only when configured
+if (enablePg) {
+  pgPool = new Pool({
+    host: process.env.PGHOST,
+    port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : undefined,
+    database: process.env.PGDATABASE,
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined,
+  });
+
+  // Ensure prompts table exists
+  (async () => {
+    try {
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS prompts (
+          id SERIAL PRIMARY KEY,
+          username TEXT,
+          domain TEXT,
+          route TEXT NOT NULL,
+          prompt TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+      console.log('PostgreSQL: prompts table is ready');
+    } catch (err) {
+      console.error('PostgreSQL initialization error:', err);
+    }
+  })();
+} else {
+  console.log('PostgreSQL logging disabled (PGHOST not set).');
+}
+
+function getUserFromReq(req) {
+  const u = (req.sso && req.sso.user) || {};
+  return {
+    username: u.name || null,
+    domain: u.domain || null,
+  };
+}
+
+async function logPrompt(req, route, promptText) {
+  try {
+    if (!pgPool) return; // no-op when PG not configured
+    const { username, domain } = getUserFromReq(req);
+    if (!promptText) return; // nothing to log
+    await pgPool.query(
+      'INSERT INTO prompts (username, domain, route, prompt) VALUES ($1, $2, $3, $4)',
+      [username, domain, route, String(promptText)]
+    );
+  } catch (err) {
+    console.error('Failed to log prompt:', err);
+  }
+}
 
 // Simple NSFW checker
 function isNSFWText(text) {
@@ -93,6 +151,9 @@ app.post('/api/generate-image', nsfwGuard('prompt'), async (req, res) => {
       return res.status(400).json({ message: 'Prompt is required' });
     }
 
+    // Log user and prompt
+    await logPrompt(req, '/api/generate-image', prompt);
+
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
     // Prepend system prompt to guide safety behavior
     const result = await model.generateContent(`${SYSTEM_PROMPT}\nUser prompt: ${prompt}`);
@@ -152,6 +213,9 @@ app.post('/api/edit-image', upload.fields([{ name: 'image' }, { name: 'mask' }])
     if (!prompt || !imagePath || !maskPath) {
       return res.status(400).json({ message: 'Prompt, image, and mask are required.' });
     }
+
+    // Log user and prompt
+    await logPrompt(req, '/api/edit-image', prompt);
 
     const imageBuffer = fs.readFileSync(imagePath);
     const maskBuffer = fs.readFileSync(maskPath);
@@ -219,6 +283,9 @@ app.post('/api/understand-image', upload.single('image'), nsfwGuard('question'),
     if (!question || !imagePath) {
       return res.status(400).json({ message: 'Question and image are required.' });
     }
+
+    // Log user and question as prompt text
+    await logPrompt(req, '/api/understand-image', question);
 
     const imageBuffer = fs.readFileSync(imagePath);
     const imageBase64 = imageBuffer.toString('base64');

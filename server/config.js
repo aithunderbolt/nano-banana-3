@@ -16,7 +16,11 @@ const NSFW_KEYWORDS = [
   // sexual violence or exploitation
   'rape', 'raped', 'molest', 'molestation', 'assault', 'sexual assault', 'incest', 'bestiality', 'zoophilia',
   // minors
-  'loli', 'lolicon', 'shota', 'minor', 'underage', 'child sexual', 'teen sex', 'cp'
+  'loli', 'lolicon', 'shota', 'minor', 'underage', 'child sexual', 'teen sex', 'cp',
+  //females
+  'woman', 'girl', 'female', 'girls', 'women', 'females', 'girls', 'women',
+  //others
+  'king', 'kingdom', 'kings', 'queens', 'queen', 'prince', 'princes', 'princess', 'princesses'
 ];
 
 const NSFW_MESSAGE = 'This request is NSFW and cannot be processed.';
