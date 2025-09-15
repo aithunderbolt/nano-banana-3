@@ -84,14 +84,29 @@ function App() {
           )}
         </div>
       </header>
-      <div className="main-content">
-        <Sidebar onSelectFeature={setActiveFeature} activeFeature={activeFeature} />
-        <main className="content">
+      {userLoading ? (
+        <div className="content" style={{ padding: 24 }}>
+          <div className="container"><p>Checking your access…</p></div>
+        </div>
+      ) : user ? (
+        <div className="main-content">
+          <Sidebar onSelectFeature={setActiveFeature} activeFeature={activeFeature} />
+          <main className="content">
+            <div className="container">
+              {renderFeature()}
+            </div>
+          </main>
+        </div>
+      ) : (
+        <div className="content" style={{ padding: 24 }}>
           <div className="container">
-            {renderFeature()}
+            <div className="feature" style={{ maxWidth: 640 }}>
+              <h2>Access denied</h2>
+              <p>You are not authenticated. Please use a browser configured for Windows Single Sign-On or contact your administrator.</p>
+            </div>
           </div>
-        </main>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -177,6 +177,7 @@ const Inpainting = () => {
       const response = await fetch(ENDPOINTS.EDIT_IMAGE, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       if (!response.ok) {

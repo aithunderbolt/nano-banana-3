@@ -16,8 +16,8 @@ const port = process.env.PORT || 5200;
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
-// Note: Do NOT apply SSO globally, otherwise all API endpoints will require negotiation and return 401.
-// We'll apply SSO only to the /api/me route to retrieve the current Windows user.
+// Apply Windows SSO to all API endpoints to block unauthenticated access
+app.use('/api', sso.auth());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -61,7 +61,7 @@ app.get('/', (req, res) => {
 });
 
 // Return authenticated Windows user info
-app.get('/api/me', sso.auth(), (req, res) => {
+app.get('/api/me', (req, res) => {
   try {
     // node-expose-sspi populates req.sso with user information
     const user = (req.sso && req.sso.user) || null;

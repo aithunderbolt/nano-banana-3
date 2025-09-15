@@ -17,6 +17,7 @@ const TextToImage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ prompt }),
       });
 

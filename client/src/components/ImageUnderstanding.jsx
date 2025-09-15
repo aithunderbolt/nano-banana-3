@@ -46,6 +46,7 @@ const ImageUnderstanding = () => {
       const apiResponse = await fetch(ENDPOINTS.UNDERSTAND_IMAGE, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       if (!apiResponse.ok) {
