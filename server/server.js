@@ -10,7 +10,7 @@ const { sso } = require('node-expose-sspi');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5200;
 
 // Enable CORS with credentials for cross-origin requests (required for IWA in some setups)
 app.use(cors({ origin: true, credentials: true }));
