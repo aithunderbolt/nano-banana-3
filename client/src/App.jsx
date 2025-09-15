@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import Sidebar from './components/Sidebar';
 import TextToImage from './components/TextToImage';
+import TextToImageN8N from './components/TextToImageN8N';
 import Inpainting from './components/Inpainting';
 import Outpainting from './components/Outpainting';
 import ImageUnderstanding from './components/ImageUnderstanding';
@@ -13,6 +14,8 @@ function App() {
     switch (activeFeature) {
       case 'text-to-image':
         return <TextToImage />;
+      case 'text-to-image-n8n':
+        return <TextToImageN8N />;
       case 'inpainting':
         return <Inpainting />;
       case 'outpainting':
