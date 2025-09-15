@@ -22,14 +22,14 @@ const Sidebar = ({ onSelectFeature, activeFeature }) => {
         className={`sidebar-button ${activeFeature === 'inpainting' ? 'active' : ''}`}
         onClick={() => onSelectFeature('inpainting')}
       >
-        <span>In-painting</span>
+        <span>Edit Image</span>
       </button>
 
       <button
         className={`sidebar-button ${activeFeature === 'outpainting' ? 'active' : ''}`}
         onClick={() => onSelectFeature('outpainting')}
       >
-        <span>Out-painting</span>
+        <span>Expand Image</span>
       </button>
 
       <button

@@ -194,7 +194,7 @@ const Inpainting = () => {
 
   return (
     <div className="feature">
-      <h2>Image In-painting</h2>
+      <h2>Edit Image</h2>
       <div className="control-group">
         <input className="file-input" type="file" onChange={handleImageUpload} accept="image/*" />
       </div>

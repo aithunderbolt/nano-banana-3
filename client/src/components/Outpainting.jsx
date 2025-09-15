@@ -4,7 +4,7 @@ import { ENDPOINTS } from '../config';
 
 const Outpainting = () => {
   const [image, setImage] = useState(null);
-  const [prompt, setPrompt] = useState('');
+  const PROMPT = 'Expand the image to reveal the environment around.';
   const [expandedImage, setExpandedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -66,7 +66,7 @@ const Outpainting = () => {
       const maskBlob = await new Promise(resolve => maskCanvas.toBlob(resolve, 'image/png'));
 
       const formData = new FormData();
-      formData.append('prompt', prompt);
+      formData.append('prompt', PROMPT);
       formData.append('image', imageBlob, 'image.png');
       formData.append('mask', maskBlob, 'mask.png');
 
@@ -93,7 +93,7 @@ const Outpainting = () => {
 
   return (
     <div className="feature">
-      <h2>Image Out-painting (Expand Image)</h2>
+      <h2>Expand Image</h2>
       <div className="control-group">
         <input className="file-input" type="file" onChange={handleImageUpload} accept="image/*" />
       </div>
@@ -109,13 +109,6 @@ const Outpainting = () => {
             </div>
 
             <div style={{width:260,display:'flex',flexDirection:'column',gap:12}}>
-              <textarea
-                className="input textarea"
-                rows="3"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe what to add to the expanded areas"
-              ></textarea>
               <button className="btn primary" onClick={handleExpand} disabled={loading}>
                 {loading ? 'Expanding...' : 'Expand Image'}
               </button>
