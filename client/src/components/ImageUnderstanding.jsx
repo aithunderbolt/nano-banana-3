@@ -82,7 +82,7 @@ const ImageUnderstanding = () => {
               </div>
             </div>
 
-            <div style={{width:350,display:'flex',flexDirection:'column',gap:12}}>
+            <div style={{width:'100%', maxWidth: '400px', marginTop: '16px'}}>
               <textarea
                 className="input textarea"
                 value={question}

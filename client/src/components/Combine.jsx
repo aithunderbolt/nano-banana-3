@@ -124,7 +124,7 @@ const Combine = () => {
               </div>
             </div>
 
-            <div style={{ width: 260, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{width: '100%', maxWidth: '500px', marginTop: '16px'}}>
               <textarea
                 className="input textarea"
                 rows="3"

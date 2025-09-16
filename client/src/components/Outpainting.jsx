@@ -105,7 +105,7 @@ const Outpainting = () => {
         <div className="inpainting-container">
           <div style={{display:'flex',gap:16,alignItems:'flex-start',width:'100%'}}>
             <div style={{flex:'1 1 600px',minWidth:0}}>
-                <p>Original Image:</p>
+                {/* <p>Original Image:</p> */}
               <div className="media-box">
                 <img src={image} alt="Original for outpainting" style={{maxWidth: '100%', maxHeight: '100%', objectFit: 'contain'}} />
               </div>

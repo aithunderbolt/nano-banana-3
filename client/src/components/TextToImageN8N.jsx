@@ -69,15 +69,15 @@ const TextToImageN8N = () => {
   return (
     <div className="feature">
       <h2>Text-to-Image Generation (n8n)</h2>
-      <div className="prompt-container">
-        <div className="control-group">
+      <div className="prompt-container" style={{maxWidth: '600px', margin: '0 auto'}}>
+        <div className="control-group" style={{flexDirection: 'column', alignItems: 'stretch'}}>
           <textarea
             className="input textarea"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="A scenic forest at sunrise, cinematic lighting"
             rows="3"
-            style={{ width: '400px' }}
+            style={{width: '100%'}}
           ></textarea>
           <button className={`btn primary`} onClick={generateImage} disabled={loading}>
             {loading ? 'Generating...' : 'Generate'}
