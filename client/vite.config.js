@@ -5,8 +5,18 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true, // listen on all network interfaces
-    allowedHosts: ['srv-hq-ai01'], // allow access by this hostname
-    // port can remain default (5173) since you start Vite with that port already
+    host: '0.0.0.0', // listen on all network interfaces
+    port: 5173,
+    strictPort: true,
+    allowedHosts: ['srv-hq-ai01', 'localhost', '127.0.0.1'],
+    cors: {
+      origin: ['http://srv-hq-ai01:5200', 'http://localhost:5200'],
+      credentials: true
+    }
   },
+  preview: {
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true
+  }
 })

@@ -13,12 +13,65 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5200;
 
-// Enable CORS with credentials for cross-origin requests (required for IWA in some setups)
-app.use(cors({ origin: true, credentials: true }));
+// Enable CORS with specific origin and credentials for Windows SSO
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost and the specific server hostname
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://srv-hq-ai01:5173',
+      'http://srv-hq-ai01',
+      'https://srv-hq-ai01'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  exposedHeaders: ['WWW-Authenticate']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Apply Windows SSO to all API endpoints to block unauthenticated access
-app.use('/api', sso.auth());
+// Configure SSO middleware with proper error handling
+const ssoMiddleware = sso.auth({
+  useSession: false,
+  useGroups: false,
+  useOwner: false,
+  useCookies: false,
+  forceNTLM: true, // Force NTLM for better compatibility
+  debug: process.env.SSO_DEBUG === 'true',
+  offerBasic: false, // Don't offer basic auth as fallback
+  offerNTLM: true,
+  offerNegotiate: true
+});
+
+// Apply Windows SSO to all API endpoints with proper error handling
+app.use('/api', (req, res, next) => {
+  ssoMiddleware(req, res, (err) => {
+    if (err) {
+      console.error('SSO Authentication Error:', err);
+      // Send proper WWW-Authenticate header for browser to show login dialog
+      res.set('WWW-Authenticate', 'Negotiate');
+      return res.status(401).json({ 
+        authenticated: false, 
+        error: 'Authentication required',
+        message: 'Please ensure your browser is configured for Windows Authentication'
+      });
+    }
+    next();
+  });
+});
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -125,6 +178,15 @@ if (!fs.existsSync('uploads')) {
 
 app.get('/', (req, res) => {
   res.send('AI Photo Editor Server is running!');
+});
+
+// Test endpoint without SSO for debugging
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    server: 'AI Photo Editor'
+  });
 });
 
 // Return authenticated Windows user info
