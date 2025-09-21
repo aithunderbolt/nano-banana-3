@@ -9,6 +9,11 @@
 # Environment variables
 /server/.env
 
+# Environment variables
+/client/.env.development
+client/.env.development
+
+
 # Uploads
 /server/uploads
 
@@ -19,3 +24,4 @@ npm-debug.log*
 # IDE and OS files
 .vscode/
 .DS_Store
+
