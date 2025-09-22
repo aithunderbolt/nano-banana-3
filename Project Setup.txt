@@ -1,0 +1,72 @@
+Project Setup: A Guide to SSO and Server Configuration
+This guide provides a detailed overview of the core architectural decisions and configurations required to successfully run this full-stack application with Windows Single Sign-On (SSO) in both production and development environments.
+
+1. Production Workflow
+In a production environment, the Node.js server acts as the single entry point for all traffic, serving both the backend API and the static React frontend files.
+
+Backend Routing (server.js):
+The routing order is critical to prevent conflicts between API calls and static file requests. The server must be configured to prioritize API routes and static assets before falling back to the client's main HTML file.
+
+// 1. API endpoints are defined first.
+app.use('/api', cors(), ssoMiddleware, ...);
+
+// 2. The express.static middleware serves all static assets (JS, CSS, images).
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// 3. The catch-all route must be last to serve index.html for all other requests.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+});
+
+Client-side Configuration (.env.production):
+To ensure the frontend makes all API calls to the same server, the base URL for the API is set to an empty string. This causes all fetch requests to be relative to the current host and port.
+
+VITE_API_BASE_URL=
+
+2. Development Workflow
+For development, we use a separate-server approach to take advantage of fast refresh and other modern development features.
+
+Backend Server:
+The Node.js server is run independently on a specific port (e.g., 5200). It is responsible solely for handling API requests.
+
+Client Server:
+The React frontend is run using the Vite development server (npm run dev). This provides a seamless, hot-reloading development experience.
+
+Client-side Configuration (.env.development):
+The client is explicitly told where to find the backend API server by providing the full URL.
+
+VITE_API_BASE_URL=http://localhost:5200
+
+CORS Proxy and Middleware:
+To avoid CORS errors in a multi-origin development setup, two key configurations are used:
+
+Vite Proxy: A proxy is configured in vite.config.js to forward all API requests from the client's development server to the backend server.
+
+// vite.config.js
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:5200',
+      changeOrigin: true,
+      secure: false,
+    },
+  },
+},
+
+Backend CORS Middleware: The server.js file is configured with CORS middleware that explicitly allows the client's development origin (http://localhost:5173) to make requests with credentials. This satisfies the browser's security requirements.
+
+// server.js
+const devCorsOptions = {
+  origin: ['http://localhost:5173', '[http://127.0.0.1:5173](http://127.0.0.1:5173)'],
+  credentials: true,
+};
+app.use('/api', cors(devCorsOptions), (req, res, next) => {
+  // ... SSO middleware
+});
+
+Key Fixes & Debugging
+PathError: This error was caused by a conflicting route definition. It was resolved by ensuring the app.get('*', ...) catch-all route was the only one of its kind and placed last in the routing stack.
+
+500 Internal Server Error: This error occurred when the server tried to serve static assets via the catch-all route. The issue was resolved by correctly implementing app.use(express.static(...)) to handle all static file requests separately.
+
+CORS Errors: The final fix involved explicitly setting the Access-Control-Allow-Origin header on the backend to match the client's origin when credentials: true is set, resolving conflicts with browser security policies.
