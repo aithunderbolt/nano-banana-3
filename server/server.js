@@ -15,27 +15,38 @@ const app = express();
 const port = process.env.PORT || 5200;
 
 // Enable CORS with specific origin and credentials for Windows SSO
+
+//for running the server and client separately in production with vite dev server - npm run dev
+// const corsOptions = {
+//     origin: function (origin, callback) {
+//       if (!origin) return callback(null, true);
+//       const allowedOrigins = [
+//         'http://localhost:5173',
+//         'http://127.0.0.1:5173',
+//         'http://srv-hq-ai01:5173',
+//         'http://srv-hq-ai01',
+//         'https://srv-hq-ai01'
+//       ];
+//       if (allowedOrigins.indexOf(origin) !== -1) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error('Not allowed by CORS'));
+//       }
+//     },
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+//     exposedHeaders: ['WWW-Authenticate']
+// };
+
+
+//for running server in production (node server.js) with build version of client
 const corsOptions = {
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      const allowedOrigins = [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'http://srv-hq-ai01:5173',
-        'http://srv-hq-ai01',
-        'https://srv-hq-ai01'
-      ];
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    exposedHeaders: ['WWW-Authenticate']
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true,
 };
+
+
 
 // app.use(cors(corsOptions));
 app.use(express.json());
