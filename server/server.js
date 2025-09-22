@@ -8,6 +8,8 @@ const { Pool } = require('pg');
 const { SYSTEM_PROMPT, NSFW_KEYWORDS, NSFW_MESSAGE } = require('./config');
 const { sso } = require('node-expose-sspi');
 
+const path = require('path');
+
 dotenv.config();
 
 const app = express();
@@ -456,6 +458,15 @@ app.post('/api/combine-images', upload.fields([{ name: 'image1' }, { name: 'imag
     try { if (img2) fs.unlinkSync(img2); } catch (_) {}
   }
 });
+
+
+// Serve React build (client/dist)
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
