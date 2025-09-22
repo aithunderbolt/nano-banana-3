@@ -4,7 +4,7 @@
 
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL)
   ? import.meta.env.VITE_API_BASE_URL
-  : 'http://localhost:5200';
+  : '';
 
 // Optional: full URL to the n8n webhook endpoint for image generation
 // Example: http://localhost:5678/webhook-test/gen-image
