@@ -3,27 +3,29 @@ import { ENDPOINTS } from '../config';
 import { downloadImage } from '../utils/download';
 
 const Combine = () => {
-  const [image1, setImage1] = useState(null);
-  const [image2, setImage2] = useState(null);
-  const [prompt, setPrompt] = useState('Blend the two images naturally.');
+  const [images, setImages] = useState([]);
+  const [prompt, setPrompt] = useState('Blend the images naturally.');
   const [resultImage, setResultImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleImageUpload = (e, which) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      if (which === 'image1') setImage1(event.target.result);
-      if (which === 'image2') setImage2(event.target.result);
+      setImages(prev => [...prev, event.target.result]);
     };
     reader.readAsDataURL(file);
   };
 
+  const handleRemoveImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleCombine = async () => {
-    if (!image1 || !image2) {
-      setError('Please upload two images first.');
+    if (images.length < 2) {
+      setError('Please upload at least two images.');
       return;
     }
     setLoading(true);
@@ -51,13 +53,14 @@ const Combine = () => {
     };
 
     try {
-      const blob1 = await dataUrlToPngBlob(image1);
-      const blob2 = await dataUrlToPngBlob(image2);
-
       const formData = new FormData();
       formData.append('prompt', prompt || '');
-      formData.append('image1', blob1, 'image1.png');
-      formData.append('image2', blob2, 'image2.png');
+      
+      // Convert all images to blobs and append to formData
+      for (let i = 0; i < images.length; i++) {
+        const blob = await dataUrlToPngBlob(images[i]);
+        formData.append('images', blob, `image${i + 1}.png`);
+      }
 
       const response = await fetch(ENDPOINTS.COMBINE_IMAGES, {
         method: 'POST',
@@ -87,42 +90,44 @@ const Combine = () => {
     <div className="feature">
       <h2>Combine Images</h2>
       <div className="control-group">
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <label className="file-input-label">
-            <span>Upload Image 1</span>
-            <input className="file-input" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'image1')} />
+            <span>Add Image</span>
+            <input className="file-input" type="file" accept="image/*" onChange={handleImageUpload} />
           </label>
-          <label className="file-input-label">
-            <span>Upload Image 2</span>
-            <input className="file-input" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'image2')} />
-          </label>
+          <span style={{ color: '#666', fontSize: '14px' }}>
+            {images.length} image{images.length !== 1 ? 's' : ''} uploaded
+          </span>
         </div>
       </div>
 
-      {(image1 || image2) && (
+      {images.length > 0 && (
         <div className="inpainting-container">
           <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', width: '100%', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-              <p>Image 1:</p>
-              <div className="media-box">
-                {image1 ? (
-                  <img src={image1} alt="First" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                ) : (
-                  <div style={{ padding: 12, color: '#777' }}>No image</div>
-                )}
+            {images.map((image, index) => (
+              <div key={index} style={{ flex: '1 1 200px', minWidth: 0, position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <p style={{ margin: 0 }}>Image {index + 1}:</p>
+                  <button 
+                    onClick={() => handleRemoveImage(index)}
+                    style={{ 
+                      background: '#ff4444', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px', 
+                      padding: '4px 8px', 
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="media-box">
+                  <img src={image} alt={`Image ${index + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                </div>
               </div>
-            </div>
-
-            <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-              <p>Image 2:</p>
-              <div className="media-box">
-                {image2 ? (
-                  <img src={image2} alt="Second" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                ) : (
-                  <div style={{ padding: 12, color: '#777' }}>No image</div>
-                )}
-              </div>
-            </div>
+            ))}
 
             <div style={{width: '100%', maxWidth: '500px', marginTop: '16px'}}>
               <textarea
@@ -130,9 +135,9 @@ const Combine = () => {
                 rows="3"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe how to combine the images (e.g., 'Place the person from image 1 into the background of image 2')"
+                placeholder="Describe how to combine the images (e.g., 'Blend all images naturally' or 'Place elements from different images together')"
               ></textarea>
-              <button className="btn primary" onClick={handleCombine} disabled={loading}>
+              <button className="btn primary" onClick={handleCombine} disabled={loading || images.length < 2}>
                 {loading ? 'Combining...' : 'Combine Images'}
               </button>
             </div>
